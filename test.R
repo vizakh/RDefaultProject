@@ -22,4 +22,35 @@ data = data[!(data$Date < as.POSIXct("2016-01-01")),]
 ggplot(data, aes(x = Date, y = number_sold)) +
   geom_line() + scale_x_date(date_labels = "%m-%Y")
 
+# ------------------------------------------------------------------------------
+data$time_index <- 1:nrow(data)
+print(data)
+# ------------------------------------------------------------------------------
+# Линейная регрессия по тренду
+linear_trend_model <- lm(number_sold ~ time_index, data = data)
+summary(linear_trend_model)
 
+# Прогноз на будущее
+forecast_interval <- 30 * 12
+future_time_index <- (nrow(data) + 1):(nrow(data) + forecast_interval)  # Прогноз на 12 месяцев вперёд
+forecast_trend <- predict(linear_trend_model, newdata = data.frame(time_index = future_time_index))
+
+# График прогноза
+plot(data$time_index, data$number_sold, 
+     type = "l", main = "Линейная регрессия по тренду", xlab = "Время", ylab = "Дефолты",
+     xlim =c(0, max(data$time_index) + forecast_interval))
+lines(future_time_index, forecast_trend, col = "blue", lty = 2)
+# ------------------------------------------------------------------------------
+
+# Линейная регрессия с трендом и сезонностью
+linear_seasonal_model <- lm(defaults ~ time_index + month_factor, data = data)
+summary(linear_seasonal_model)
+
+# Прогноз на будущее
+future_month_factor <- as.factor(rep(1:12, length.out = 12))  # 12 месяцев вперёд
+future_data <- data.frame(time_index = future_time_index, month_factor = future_month_factor)
+forecast_seasonal <- predict(linear_seasonal_model, newdata = future_data)
+
+# График прогноза
+plot(data$time_index, data$defaults, type = "l", main = "Линейная регрессия с трендом и сезонностью", xlab = "Время", ylab = "Дефолты")
+lines(future_time_index, forecast_seasonal, col = "red", lty = 2)
