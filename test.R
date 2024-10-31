@@ -2,6 +2,7 @@ library(magrittr)
 library(dplyr)
 library(lubridate)
 library(ggplot2)
+library(forecast)
 
 data <- read.table('F:/Pivdennyy/train.csv', header = TRUE, sep = ',',
                    colClasses = c("character", "NULL", "NULL", "numeric"))
@@ -31,7 +32,7 @@ linear_trend_model <- lm(number_sold ~ time_index, data = data)
 summary(linear_trend_model)
 
 # Прогноз на будущее
-forecast_interval <- 30 * 12
+forecast_interval <- 30 * 12 + 5
 future_time_index <- (nrow(data) + 1):(nrow(data) + forecast_interval)  # Прогноз на 12 месяцев вперёд
 forecast_trend <- predict(linear_trend_model, newdata = data.frame(time_index = future_time_index))
 
@@ -41,7 +42,7 @@ plot(data$time_index, data$number_sold,
      xlim =c(0, max(data$time_index) + forecast_interval))
 lines(future_time_index, forecast_trend, col = "blue", lty = 2)
 # ------------------------------------------------------------------------------
-data$month_factor <- as.factor(format(data$Date, "%m"))  # Месяц как фактор для сезонности
+data$month_factor <- as.factor(as.numeric(format(data$Date, "%m")))  # Месяц как фактор для сезонности
 print(data)
 
 # Линейная регрессия с трендом и сезонностью
@@ -50,12 +51,13 @@ summary(linear_seasonal_model)
 
 # Прогноз на будущее
 future_time_index <- (nrow(data) + 1):(nrow(data) + forecast_interval)  # Прогнозируем на 12 месяцев вперёд
-future_month_factor <- as.factor(c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"))
+
+future_dates <- seq(as.Date("2019-01-01"), as.Date("2019-12-31"), by="days")
+future_month_factor <- as.factor(as.numeric(format(future_dates, "%m")))
+
 future_data <- data.frame(time_index = future_time_index)
 future_data$month_factor <- future_month_factor
 print(future_data)
-str(future_data)
-str(data)
 
 # Построение прогноза
 forecast_seasonal <- predict(linear_seasonal_model, newdata = future_data)
