@@ -3,6 +3,7 @@ library(dplyr)
 library(lubridate)
 library(ggplot2)
 library(forecast)
+library(mgcv)
 
 data <- read.table('F:/Pivdennyy/train.csv', header = TRUE, sep = ',',
                    colClasses = c("character", "NULL", "NULL", "numeric"))
@@ -111,6 +112,72 @@ grid()
 lines(future_time_index, forecast_poly[, "fit"], col = "red", lty = 1)  # Середнє значення прогнозу
 lines(future_time_index, forecast_poly[, "lwr"], col = "blue", lty = 2) # Нижня границя інтервалу
 lines(future_time_index, forecast_poly[, "upr"], col = "blue", lty = 2) # Верхня границя інтервалу
+
+# Легенда до графіку
+legend("bottomright", legend = c("Middle forecast", "Confidence interval (95%)"),
+       col = c("red", "blue"), lty = c(1, 2), bty = "n")
+
+# Логаріфмічна модель-----------------------------------------------------------
+# # Логарифмическая трансформация целевой переменной
+# log_model <- lm(log(number_sold) ~ time_index + week_factor, data = data)
+# 
+# # Прогноз (экспоненциальная трансформация предсказанного значения)
+# forecast_log <- exp(predict(log_model, newdata = future_data, interval = "confidence"))
+# 
+# plot(data$time_index, data$number_sold, type = "l", main = "Logarithmic model", 
+#      xlab = "Time", ylab = "Defaults", xlim = c(1, max(future_time_index)),
+#      ylim = c(min(data$number_sold) - 300, max(data$number_sold)) + 300)
+# grid()
+# lines(future_time_index, forecast_log[, "fit"], col = "red", lty = 1)  # Середнє значення прогнозу
+# lines(future_time_index, forecast_log[, "lwr"], col = "blue", lty = 2) # Нижня границя інтервалу
+# lines(future_time_index, forecast_log[, "upr"], col = "blue", lty = 2) # Верхня границя інтервалу
+# 
+# # Легенда до графіку
+# legend("bottomright", legend = c("Middle forecast", "Confidence interval (95%)"),
+#        col = c("red", "blue"), lty = c(1, 2), bty = "n")
+
+# Сінусоїдальна модель----------------------------------------------------------
+# Добавляем синусоидальные термы для моделирования сезонности
+data$sin_term <- sin(2 * pi * data$time_index / 52)
+data$cos_term <- cos(2 * pi * data$time_index / 52)
+
+# Модель с синусоидальными компонентами для сезонности и линейным трендом
+sinusoidal_model <- lm(number_sold ~ time_index + week_factor + sin_term + cos_term, data = data)
+
+# Прогноз
+future_data$sin_term <- sin(2 * pi * future_data$time_index / 52)
+future_data$cos_term <- cos(2 * pi * future_data$time_index / 52)
+
+forecast_sinusoidal <- predict(sinusoidal_model, newdata = future_data, interval = "confidence")
+
+plot(data$time_index, data$number_sold, type = "l", main = "Sinusoidal model", 
+     xlab = "Time", ylab = "Defaults", xlim = c(1, max(future_time_index)),
+     ylim = c(min(data$number_sold) - 300, max(data$number_sold)) + 300)
+grid()
+lines(future_time_index, forecast_sinusoidal[, "fit"], col = "red", lty = 1)  # Середнє значення прогнозу
+lines(future_time_index, forecast_sinusoidal[, "lwr"], col = "blue", lty = 2) # Нижня границя інтервалу
+lines(future_time_index, forecast_sinusoidal[, "upr"], col = "blue", lty = 2) # Верхня границя інтервалу
+
+# Легенда до графіку
+legend("bottomright", legend = c("Middle forecast", "Confidence interval (95%)"),
+       col = c("red", "blue"), lty = c(1, 2), bty = "n")
+
+# GAM---------------------------------------------------------------------------
+gam_model <- gam(number_sold ~ s(time_index) + week_factor, data = data)
+
+# Прогноз
+forecast_gam <- predict(gam_model, newdata = future_data, se.fit = TRUE)
+
+upr <- forecast_gam$fit + (2 * forecast_gam$se.fit)
+lwr <- forecast_gam$fit - (2 * forecast_gam$se.fit)
+
+plot(data$time_index, data$number_sold, type = "l", main = "GAM", 
+     xlab = "Time", ylab = "Defaults", xlim = c(1, max(future_time_index)),
+     ylim = c(min(data$number_sold) - 300, max(data$number_sold)) + 300)
+grid()
+lines(future_time_index, forecast_gam$fit, col = "red", lty = 1)  # Середнє значення прогнозу
+lines(future_time_index, upr, col = "blue", lty = 2) # Нижня границя інтервалу
+lines(future_time_index, lwr, col = "blue", lty = 2) # Верхня границя інтервалу
 
 # Легенда до графіку
 legend("bottomright", legend = c("Middle forecast", "Confidence interval (95%)"),
