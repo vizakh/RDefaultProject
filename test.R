@@ -53,21 +53,22 @@ grid()
 lines(future_time_index, forecast_trend, col = "blue", lty = 2)
 
 # Лінійна регресія з трендом та сезонністю--------------------------------------
-data$month_factor <- as.factor(as.numeric(format(data$Date, "%V")))  # Місяць як фактор для сезонності
+data$week_factor <- as.factor(as.numeric(format(data$Date, "%V")))  # Тиждень як фактор для сезонності
+data$month_factor <- as.factor(as.numeric(format(data$Date, "%m"))) # Місяць як фактор для сезонності
 print(data)
 
 # Лінійна регресія з трендом та сезонністю
-linear_seasonal_model <- lm(number_sold ~ time_index + month_factor, data = data)
+linear_seasonal_model <- lm(number_sold ~ time_index + week_factor, data = data)
 summary(linear_seasonal_model)
 
 # Прогноз на майбутнє
 future_time_index <- (nrow(data) + 1):(nrow(data) + forecast_interval)  # Прогнозуємо на 12 місяців наперед
 
 future_dates <- seq(as.Date("2019-01-01"), as.Date("2019-12-31"), by="days")
-future_month_factor <- as.factor(as.numeric(format(future_dates, "%V")))
+future_week_factor <- as.factor(as.numeric(format(future_dates, "%V")))
 
 future_data <- data.frame(time_index = future_time_index)
-future_data$month_factor <- future_month_factor
+future_data$week_factor <- future_week_factor
 print(future_data)
 
 # Прогноз з довірчими інтервалами
@@ -76,7 +77,8 @@ forecast_seasonal <- predict(linear_seasonal_model, newdata = future_data,
 
 # Графік даних та прогнозів з інтервалами
 plot(data$time_index, data$number_sold, type = "l", main = "LM with trend and seasonality", 
-     xlab = "Time", ylab = "Defaults", xlim = c(1, max(future_time_index)))
+     xlab = "Time", ylab = "Defaults", xlim = c(1, max(future_time_index)),
+     ylim = c(min(data$number_sold) - 300, max(data$number_sold)) + 300)
 grid()
 lines(future_time_index, forecast_seasonal[, "fit"], col = "red", lty = 1)  # Середнє значення прогнозу
 lines(future_time_index, forecast_seasonal[, "lwr"], col = "blue", lty = 2) # Нижня границя інтервалу
@@ -85,3 +87,33 @@ lines(future_time_index, forecast_seasonal[, "upr"], col = "blue", lty = 2) # В
 # Легенда до графіку
 legend("bottomright", legend = c("Middle forecast", "Confidence interval (95%)"),
        col = c("red", "blue"), lty = c(1, 2), bty = "n")
+
+# Модель з поліноміальним трендом та сезонним фактором--------------------------
+data$time_squared <- data$time_index^2
+
+poly_model <- lm(number_sold ~ time_index + time_squared + week_factor, data = data)
+summary(poly_model)
+
+# Прогноз
+future_data <- data.frame(
+  time_index = (nrow(data) + 1):(nrow(data) + forecast_interval),
+  time_squared = ((nrow(data) + 1):(nrow(data) + forecast_interval))^2,
+  week_factor = as.factor(as.numeric(format(future_dates, "%V")))
+)
+
+forecast_poly <- predict(poly_model, newdata = future_data, 
+                         interval = "confidence", level = 0.95)
+
+plot(data$time_index, data$number_sold, type = "l", main = "Polynomial model", 
+     xlab = "Time", ylab = "Defaults", xlim = c(1, max(future_time_index)),
+     ylim = c(min(data$number_sold) - 300, max(data$number_sold)) + 300)
+grid()
+lines(future_time_index, forecast_poly[, "fit"], col = "red", lty = 1)  # Середнє значення прогнозу
+lines(future_time_index, forecast_poly[, "lwr"], col = "blue", lty = 2) # Нижня границя інтервалу
+lines(future_time_index, forecast_poly[, "upr"], col = "blue", lty = 2) # Верхня границя інтервалу
+
+# Легенда до графіку
+legend("bottomright", legend = c("Middle forecast", "Confidence interval (95%)"),
+       col = c("red", "blue"), lty = c(1, 2), bty = "n")
+
+#-------------------------------------------------------------------------------
