@@ -9,6 +9,14 @@ data <- read.table('F:/Pivdennyy/train.csv', header = TRUE, sep = ',',
                    colClasses = c("character", "NULL", "NULL", "numeric"))
 head(data)
 
+test_data <- read.table('F:/Pivdennyy/test.csv', header = TRUE, sep = ',',
+                        colClasses = c("character", "NULL", "NULL", "numeric"))
+test_data <- test_data[!(test_data$Date >= as.POSIXct("2020-01-01")),]
+test_data <- test_data %>%
+  group_by(Date) %>%
+  summarise(number_sold = sum(number_sold))
+print(test_data)
+
 # Обробка даних та будування графіків-------------------------------------------
 data$Date <- ymd(data$Date)
 str(data)
@@ -81,6 +89,7 @@ plot(data$time_index, data$number_sold, type = "l", main = "LM with trend and se
      xlab = "Time", ylab = "Defaults", xlim = c(1, max(future_time_index)),
      ylim = c(min(data$number_sold) - 300, max(data$number_sold)) + 300)
 grid()
+lines(future_time_index, test_data$number_sold, col = "grey", lty = 1)
 lines(future_time_index, forecast_seasonal[, "fit"], col = "red", lty = 1)  # Середнє значення прогнозу
 lines(future_time_index, forecast_seasonal[, "lwr"], col = "blue", lty = 2) # Нижня границя інтервалу
 lines(future_time_index, forecast_seasonal[, "upr"], col = "blue", lty = 2) # Верхня границя інтервалу
@@ -109,6 +118,7 @@ plot(data$time_index, data$number_sold, type = "l", main = "Polynomial model",
      xlab = "Time", ylab = "Defaults", xlim = c(1, max(future_time_index)),
      ylim = c(min(data$number_sold) - 300, max(data$number_sold)) + 300)
 grid()
+lines(future_time_index, test_data$number_sold, col = "grey", lty = 1)
 lines(future_time_index, forecast_poly[, "fit"], col = "red", lty = 1)  # Середнє значення прогнозу
 lines(future_time_index, forecast_poly[, "lwr"], col = "blue", lty = 2) # Нижня границя інтервалу
 lines(future_time_index, forecast_poly[, "upr"], col = "blue", lty = 2) # Верхня границя інтервалу
@@ -154,6 +164,7 @@ plot(data$time_index, data$number_sold, type = "l", main = "Sinusoidal model",
      xlab = "Time", ylab = "Defaults", xlim = c(1, max(future_time_index)),
      ylim = c(min(data$number_sold) - 300, max(data$number_sold)) + 300)
 grid()
+lines(future_time_index, test_data$number_sold, col = "grey", lty = 1)
 lines(future_time_index, forecast_sinusoidal[, "fit"], col = "red", lty = 1)  # Середнє значення прогнозу
 lines(future_time_index, forecast_sinusoidal[, "lwr"], col = "blue", lty = 2) # Нижня границя інтервалу
 lines(future_time_index, forecast_sinusoidal[, "upr"], col = "blue", lty = 2) # Верхня границя інтервалу
@@ -175,6 +186,7 @@ plot(data$time_index, data$number_sold, type = "l", main = "GAM",
      xlab = "Time", ylab = "Defaults", xlim = c(1, max(future_time_index)),
      ylim = c(min(data$number_sold) - 300, max(data$number_sold)) + 300)
 grid()
+lines(future_time_index, test_data$number_sold, col = "grey", lty = 1)
 lines(future_time_index, forecast_gam$fit, col = "red", lty = 1)  # Середнє значення прогнозу
 lines(future_time_index, upr, col = "blue", lty = 2) # Нижня границя інтервалу
 lines(future_time_index, lwr, col = "blue", lty = 2) # Верхня границя інтервалу
