@@ -27,43 +27,50 @@ ggplot(data, aes(x = Date, y = number_sold)) +
 data$time_index <- 1:nrow(data)
 print(data)
 # ------------------------------------------------------------------------------
-# Линейная регрессия по тренду
+# Лінійна регресія з трендом
 linear_trend_model <- lm(number_sold ~ time_index, data = data)
 summary(linear_trend_model)
 
-# Прогноз на будущее
+# Прогноз на майбутнє
 forecast_interval <- 30 * 12 + 5
-future_time_index <- (nrow(data) + 1):(nrow(data) + forecast_interval)  # Прогноз на 12 месяцев вперёд
+future_time_index <- (nrow(data) + 1):(nrow(data) + forecast_interval)  # Прогнозуємо на 12 місяців наперед
 forecast_trend <- predict(linear_trend_model, newdata = data.frame(time_index = future_time_index))
 
-# График прогноза
+# Графік прогнозу
 plot(data$time_index, data$number_sold, 
-     type = "l", main = "Линейная регрессия по тренду", xlab = "Время", ylab = "Дефолты",
+     type = "l", main = "LM with trend", xlab = "Time", ylab = "Defaults",
      xlim =c(0, max(data$time_index) + forecast_interval))
+grid()
 lines(future_time_index, forecast_trend, col = "blue", lty = 2)
 # ------------------------------------------------------------------------------
-data$month_factor <- as.factor(as.numeric(format(data$Date, "%m")))  # Месяц как фактор для сезонности
+data$month_factor <- as.factor(as.numeric(format(data$Date, "%V")))  # Місяць як фактор для сезонності
 print(data)
 
-# Линейная регрессия с трендом и сезонностью
+# Лінійна регресія з трендом та сезонністю
 linear_seasonal_model <- lm(number_sold ~ time_index + month_factor, data = data)
 summary(linear_seasonal_model)
 
-# Прогноз на будущее
-future_time_index <- (nrow(data) + 1):(nrow(data) + forecast_interval)  # Прогнозируем на 12 месяцев вперёд
+# Прогноз на майбутнє
+future_time_index <- (nrow(data) + 1):(nrow(data) + forecast_interval)  # Прогнозуємо на 12 місяців наперед
 
 future_dates <- seq(as.Date("2019-01-01"), as.Date("2019-12-31"), by="days")
-future_month_factor <- as.factor(as.numeric(format(future_dates, "%m")))
+future_month_factor <- as.factor(as.numeric(format(future_dates, "%V")))
 
 future_data <- data.frame(time_index = future_time_index)
 future_data$month_factor <- future_month_factor
 print(future_data)
 
-# Построение прогноза
-forecast_seasonal <- predict(linear_seasonal_model, newdata = future_data)
+# Прогноз з довірчими інтервалами
+forecast_seasonal <- predict(linear_seasonal_model, newdata = future_data, 
+                             interval = "confidence", level = 0.95)
 
-# График прогноза
-plot(data$time_index, data$number_sold, 
-     type = "l", main = "Линейная регрессия с трендом и сезонностью", xlab = "Время", ylab = "Дефолты",
-     xlim =c(0, max(data$time_index) + forecast_interval))
-lines(future_time_index, forecast_seasonal, col = "red", lty = 2)
+# Графік даних та прогнозів з інтервалами
+plot(data$time_index, data$number_sold, type = "l", main = "LM with trend and seasonality", xlab = "Time", ylab = "Defaults", xlim = c(1, max(future_time_index)))
+grid()
+lines(future_time_index, forecast_seasonal[, "fit"], col = "red", lty = 1)         # Середнє значення прогнозу
+lines(future_time_index, forecast_seasonal[, "lwr"], col = "blue", lty = 2)        # Нижня границя інтервалу
+lines(future_time_index, forecast_seasonal[, "upr"], col = "blue", lty = 2)        # Верхня границя інтервалу
+
+# Легенда до графіку
+legend("bottomright", legend = c("Middle forecast", "Confidence interval (95%)"),
+       col = c("red", "blue"), lty = c(1, 2), bty = "n")
