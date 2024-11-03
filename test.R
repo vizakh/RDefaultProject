@@ -11,11 +11,6 @@ head(data)
 
 test_data <- read.table('F:/Pivdennyy/test.csv', header = TRUE, sep = ',',
                         colClasses = c("character", "NULL", "NULL", "numeric"))
-test_data <- test_data[!(test_data$Date >= as.POSIXct("2020-01-01")),]
-test_data <- test_data %>%
-  group_by(Date) %>%
-  summarise(number_sold = sum(number_sold))
-print(test_data)
 
 # Обробка даних та будування графіків-------------------------------------------
 data$Date <- ymd(data$Date)
@@ -24,6 +19,12 @@ str(data)
 data <- data %>%
   group_by(Date) %>%
   summarise(number_sold = sum(number_sold))
+
+test_data <- test_data[!(test_data$Date >= as.POSIXct("2020-01-01")),]
+test_data <- test_data %>%
+  group_by(Date) %>%
+  summarise(number_sold = sum(number_sold))
+print(test_data)
 
 ggplot(data, aes(x = Date, y = number_sold)) +
   geom_line() + scale_x_date(date_labels = "%m-%Y")
@@ -63,6 +64,7 @@ lines(future_time_index, forecast_trend, col = "blue", lty = 2)
 
 # Лінійна регресія з трендом та сезонністю--------------------------------------
 data$week_factor <- as.factor(as.numeric(format(data$Date, "%V")))  # Тиждень як фактор для сезонності
+data$day_factor <- as.factor(as.numeric(format(data$Date, "%d")))  # День як фактор для сезонності
 data$month_factor <- as.factor(as.numeric(format(data$Date, "%m"))) # Місяць як фактор для сезонності
 print(data)
 
@@ -74,10 +76,10 @@ summary(linear_seasonal_model)
 future_time_index <- (nrow(data) + 1):(nrow(data) + forecast_interval)  # Прогнозуємо на 12 місяців наперед
 
 future_dates <- seq(as.Date("2019-01-01"), as.Date("2019-12-31"), by="days")
-future_week_factor <- as.factor(as.numeric(format(future_dates, "%V")))
+future_factor <- as.factor(as.numeric(format(future_dates, "%V")))
 
 future_data <- data.frame(time_index = future_time_index)
-future_data$week_factor <- future_week_factor
+future_data$week_factor <- future_factor
 print(future_data)
 
 # Прогноз з довірчими інтервалами
@@ -194,5 +196,3 @@ lines(future_time_index, lwr, col = "blue", lty = 2) # Верхня границ
 # Легенда до графіку
 legend("bottomright", legend = c("Middle forecast", "Confidence interval (95%)"),
        col = c("red", "blue"), lty = c(1, 2), bty = "n")
-
-#-------------------------------------------------------------------------------
