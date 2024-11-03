@@ -1,4 +1,5 @@
-linear_trend_seasonality <- function(data, test_data, seasonality, legend_pos) {
+linear_trend_seasonality <- function(data, test_data, seasonality, 
+                                     title, legend_pos) {
   data$time_index <- 1:nrow(data)
   data$seasonality <- seasonality(data$Date)
   
@@ -21,7 +22,7 @@ linear_trend_seasonality <- function(data, test_data, seasonality, legend_pos) {
     geom_line(data = test_data, aes(x = Date, y = fit, color = "Середнє значення")) +
     geom_line(data = test_data, aes(x = Date, y = upr, color = "Довірчий інтервал (95%)")) +
     geom_line(data = test_data, aes(x = Date, y = lwr, color = "Довірчий інтервал (95%)")) +
-    labs(title = "Лінійна регресія з трендом та сезонністю",
+    labs(title = title,
          x = "Дата",
          y = "Продажі") +
     scale_color_manual(values = c("Вихідні дані" = "black", "Тестові дані" = "grey",

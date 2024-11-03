@@ -5,6 +5,7 @@ library(ggplot2)
 
 source("process_data.R")
 source("linear_trend_seasonality.R")
+source("visualize_data.R")
 
 data <- read.table('F:/Pivdennyy/train.csv', header = TRUE, sep = ',')
 data_limit_dates <- c(as.POSIXct("2016-01-01"), as.POSIXct("2019-01-01"))
@@ -21,28 +22,18 @@ head(daily_test_data)
 head(monthly_data)
 head(monthly_test_data)
 
-ggplot(daily_data, aes(x = Date)) +
-  geom_line(aes(y = number_sold, color = "Вихідні дані")) +
-  labs(title = "Вихідні дані",
-       x = "Дата",
-       y = "Продажі") +
-  scale_color_manual(values = c("Вихідні дані" = "black")) +
-  theme(legend.position = c(0.89, 0.05),
-        legend.background = element_rect(fill = "white", color = "black"),
-        legend.title = element_blank())
+visualize_data(daily_data, "Вихідні дані", 
+               c("Вихідні дані", "Дата", "Продажі"),
+               c(0.89, 0.07))
 
-ggplot(monthly_data, aes(x = Date)) +
-  geom_line(aes(y = number_sold, color = "Вихідні дані")) +
-  labs(title = "Вихідні дані (щомісячні)",
-       x = "Дата",
-       y = "Продажі") +
-  scale_color_manual(values = c("Вихідні дані" = "black")) +
-  theme(legend.position = c(0.89, 0.05),
-        legend.background = element_rect(fill = "white", color = "black"),
-        legend.title = element_blank())
+visualize_data(monthly_data, "Вихідні дані (щомісячні)", 
+               c("Вихідні дані (щомісячні)", "Дата", "Продажі"),
+               c(0.17, 0.07))
 
 linear_trend_seasonality(daily_data, daily_test_data, week, 
+                         title = "Лінійна регресія з трендом та сезонністю (щоденно)", 
                          legend_pos = c(0.2, 0.85))
 
 linear_trend_seasonality(monthly_data, monthly_test_data, quarter, 
-                         legend_pos = c(0.17, 0.89))
+                         title = "Лінійна регресія з трендом та сезонністю (щомісячно)", 
+                         legend_pos = c(0.17, 0.14))
