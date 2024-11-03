@@ -2,12 +2,14 @@ library(dplyr)
 library(lubridate)
 library(xts)
 library(ggplot2)
+library(mgcv)
 
 source("process_data.R")
 source("visualize_data.R")
 source("linear_trend_seasonality.R")
 source("poly_trend_seasonality.R")
 source("gen_add_model.R")
+source("vasicek.R")
 
 data <- read.table('F:/Pivdennyy/train.csv', header = TRUE, sep = ',')
 data_limit_dates <- c(as.POSIXct("2016-01-01"), as.POSIXct("2019-01-01"))
@@ -31,6 +33,10 @@ visualize_data(daily_data, "Вихідні дані (щоденні)",
 visualize_data(monthly_data, "Вихідні дані (щомісячні)", 
                c("Вихідні дані (щомісячні)", "Дата", "Продажі"),
                c(0.17, 0.07))
+
+# Модель Васічека---------------------------------------------------------------------------------
+VasicekModel(daily_data, daily_test_data, 
+             title = "Модель Васічека", legend_pos = c(0.16, 0.88))
 
 # Лінійна модель з трендом та сезонністю----------------------------------------------------------
 linear_trend_seasonality(daily_data, daily_test_data, week, 
