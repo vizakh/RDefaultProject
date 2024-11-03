@@ -5,6 +5,7 @@ library(ggplot2)
 
 source("process_data.R")
 source("linear_trend_seasonality.R")
+source("poly_trend_seasonality.R")
 source("visualize_data.R")
 
 data <- read.table('F:/Pivdennyy/train.csv', header = TRUE, sep = ',')
@@ -22,9 +23,9 @@ head(daily_test_data)
 head(monthly_data)
 head(monthly_test_data)
 
-visualize_data(daily_data, "Вихідні дані", 
+visualize_data(daily_data, "Вихідні дані (щоденні)", 
                c("Вихідні дані", "Дата", "Продажі"),
-               c(0.89, 0.07))
+               c(0.84, 0.07))
 
 visualize_data(monthly_data, "Вихідні дані (щомісячні)", 
                c("Вихідні дані (щомісячні)", "Дата", "Продажі"),
@@ -33,7 +34,13 @@ visualize_data(monthly_data, "Вихідні дані (щомісячні)",
 linear_trend_seasonality(daily_data, daily_test_data, week, 
                          title = "Лінійна регресія з трендом та сезонністю (щоденно)", 
                          legend_pos = c(0.2, 0.85))
-
 linear_trend_seasonality(monthly_data, monthly_test_data, quarter, 
                          title = "Лінійна регресія з трендом та сезонністю (щомісячно)", 
                          legend_pos = c(0.17, 0.14))
+
+poly_trend_seasonality(daily_data, daily_test_data, week, 
+                       title = "Поліноміальна регресія з трендом та сезонністю (щоденно)", 
+                       legend_pos = c(0.2, 0.85))
+poly_trend_seasonality(monthly_data, monthly_test_data, month, 
+                         title = "Поліноміальна регресія з трендом та сезонністю (щомісячно)", 
+                         legend_pos = c(0.17, 0.85))
