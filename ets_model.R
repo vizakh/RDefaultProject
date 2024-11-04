@@ -1,8 +1,11 @@
-ets_model <- function(data, h, title, legend_pos) {
-  model_ets <- ets(data, model = "MAA")
+ets_model <- function(data, test_data, frequency) {
+  ts_data <- ts(data$number_sold, frequency = frequency)
   
-  forecast_ets <- forecast(model_ets, h = h)
-  str(forecast_ets)
+  ets_model <- ets(ts_data)
+  print(summary(ets_model))
   
-  plot(forecast_ets)
+  ets_forecast <- forecast(ets_model, h = nrow(test_data))
+  
+  print(ets_forecast)
+  plot(ets_forecast)
 }

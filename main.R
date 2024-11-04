@@ -4,6 +4,7 @@ library(xts)
 library(ggplot2)
 library(mgcv)
 library(forecast)
+library(RODBC)
 
 source("process_data.R")
 source("visualize_data.R")
@@ -13,28 +14,25 @@ source("poly_trend_seasonality.R")
 source("gen_add_model.R")
 source("ets_model.R")
 
-data <- read.table('F:/Pivdennyy/train.csv', header = TRUE, sep = ',')
-data_limit_dates <- c(as.POSIXct("2016-01-01"), as.POSIXct("2019-01-01"))
-daily_data <- process_daily_data(data, data_limit_dates)
-monthly_data <- process_monthly_data(data, data_limit_dates)
+wb <- "F:/Pivdennyy/stat.xlsb"
+con2 <- odbcConnectExcel2007(wb)
+all_daily_data <- sqlFetch(con2, "По денно всі")
+cor_daily_data <- sqlFetch(con2, "По денно КОР")
+all_dates_data <- sqlFetch(con2, "Звітні дати всі")
+cor_dates_data <- sqlFetch(con2, "Звітні дати КОР")
 
-test_data <- read.table('F:/Pivdennyy/test.csv', header = TRUE, sep = ',')
-daily_test_data <- process_daily_data(test_data)
-monthly_test_data <- process_monthly_data(test_data)
-
-head(daily_data)
-head(daily_test_data)
-
-head(monthly_data)
-head(monthly_test_data)
+all_daily_data <- process_daily_data(all_daily_data)
+cor_daily_data <- process_daily_data(cor_daily_data)
+all_dates_data <- process_daily_data(all_dates_data)
+cor_dates_data <- process_daily_data(cor_dates_data)
 
 visualize_data(daily_data, "Вихідні дані (щоденні)", 
                c("Вихідні дані", "Дата", "Продажі"),
                c(0.84, 0.07))
 
-visualize_data(monthly_data, "Вихідні дані (щомісячні)", 
-               c("Вихідні дані (щомісячні)", "Дата", "Продажі"),
-               c(0.17, 0.07))
+# visualize_data(monthly_data, "Вихідні дані (щомісячні)", 
+#                c("Вихідні дані (щомісячні)", "Дата", "Продажі"),
+#                c(0.17, 0.07))
 
 # Модель Васічека---------------------------------------------------------------------------------
 VasicekModel(daily_data, daily_test_data, 
@@ -46,7 +44,7 @@ VasicekModel(monthly_data, monthly_test_data,
 linear_trend_seasonality(daily_data, daily_test_data, week, 
                          title = "Лінійна регресія з трендом та сезонністю (щоденно)", 
                          legend_pos = c(0.2, 0.85))
-linear_trend_seasonality(monthly_data, monthly_test_data, quarter, 
+linear_trend_seasonality(monthly_data, monthly_test_data, month, 
                          title = "Лінійна регресія з трендом та сезонністю (щомісячно)", 
                          legend_pos = c(0.17, 0.14))
 
@@ -67,5 +65,24 @@ gen_add_model(monthly_data, monthly_test_data, month,
               legend_pos = c(0.17, 0.85))
 
 # # ETS модель--------------------------------------------------------------------------------------
-# ets_model(daily_data, 50, title = "ETS модель (щоденно)", legend_pos = c(0.2, 0.85))
+# ets_model(daily_data, daily_test_data, 365)
+# ets_model(monthly_data, monthly_test_data, 12)
 
+weekly_data <- daily_data %>%
+  group_by(Date = floor_date(Date, 'week')) %>%
+  summarise(number_sold = sum(number_sold))
+weekly_data <- weekly_data[2:(nrow(weekly_data) - 1),]
+
+ts_data_weekly <- ts(weekly_data$number_sold, start = c(2016, 1), frequency = 7)
+ts_data_monthly <- ts(monthly_data$number_sold, start = c(2016, 1), frequency = 12)
+sarima_model <- auto.arima(ts_data_monthly, seasonal = TRUE)
+sarima_model <- auto.arima(ts_data_weekly, seasonal = TRUE)
+
+print(sarima_model)
+
+# Прогноз на будущее (например, на 52 недели вперед)
+forecast_horizon <- 26  # Прогноз на 1 год
+sarima_forecast <- forecast(sarima_model, h = forecast_horizon)
+
+# Отображение прогноза
+plot(sarima_forecast)
