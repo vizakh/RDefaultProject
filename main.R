@@ -6,6 +6,7 @@ library(mgcv)
 library(forecast)
 library(RODBC)
 library(gsubfn)
+library(patchwork)
 
 source("process_data.R")
 source("visualize_data.R")
@@ -13,7 +14,6 @@ source("vasicek.R")
 source("linear_trend_seasonality.R")
 source("poly_trend_seasonality.R")
 source("gen_add_model.R")
-source("ets_model.R")
 
 wb <- "F:/Pivdennyy/stat.xlsb"
 con2 <- odbcConnectExcel2007(wb)
@@ -58,53 +58,63 @@ cor_dates_test <- train_test_set[[2]]
 
 # Модель Васічека---------------------------------------------------------------------------------
 set.seed(411)
-VasicekModel(all_daily_train, all_daily_test, 
-             title = "Модель Васічека", legend_pos = c(0.2, 0.85))
-VasicekModel(cor_daily_train, cor_daily_test, 
-             title = "Модель Васічека", legend_pos = c(0.2, 0.85))
-VasicekModel(all_dates_train, all_dates_test, 
-             title = "Модель Васічека", legend_pos = c(0.2, 0.85))
-VasicekModel(cor_dates_train, cor_dates_test, 
-             title = "Модель Васічека", legend_pos = c(0.2, 0.85))
+all_daily_vasicek_plot <- VasicekModel(all_daily_train, all_daily_test, 
+             title = "Модель Васічека (по денно всі)", legend_pos = c(0.2, 0.85))
+cor_daily_vasicek_plot <- VasicekModel(cor_daily_train, cor_daily_test, 
+             title = "Модель Васічека (по денно КОР)", legend_pos = c(0.2, 0.85))
+all_dates_vasicek_plot <- VasicekModel(all_dates_train, all_dates_test, 
+             title = "Модель Васічека (Звітні дати всі)", legend_pos = c(0.2, 0.85))
+cor_dates_vasicek_plot <- VasicekModel(cor_dates_train, cor_dates_test, 
+             title = "Модель Васічека (Звітні дати КОР)", legend_pos = c(0.2, 0.85))
 
 # Лінійна модель з трендом та сезонністю----------------------------------------------------------
-linear_trend_seasonality(all_daily_train, all_daily_test, week, 
-                         title = "Лінійна регресія з трендом та сезонністю (по денно всі)", 
-                         legend_pos = c(0.2, 0.85))
-linear_trend_seasonality(cor_daily_train, cor_daily_test, week, 
-                         title = "Лінійна регресія з трендом та сезонністю (по денно КОР)", 
-                         legend_pos = c(0.2, 0.85))
-linear_trend_seasonality(all_dates_train, all_dates_test, month, 
-                         title = "Лінійна регресія з трендом та сезонністю (Звітні дати всі)", 
-                         legend_pos = c(0.2, 0.85))
-linear_trend_seasonality(cor_dates_train, cor_dates_test, month, 
-                         title = "Лінійна регресія з трендом та сезонністю (Звітні дати КОР)", 
-                         legend_pos = c(0.2, 0.85))
+all_daily_linear_plot <- linear_trend_seasonality(all_daily_train, all_daily_test, week, 
+                          title = "Лінійна регресія з трендом та сезонністю (по денно всі)", 
+                          legend_pos = c(0.2, 0.85))
+cor_daily_linear_plot <- linear_trend_seasonality(cor_daily_train, cor_daily_test, week, 
+                          title = "Лінійна регресія з трендом та сезонністю (по денно КОР)", 
+                          legend_pos = c(0.2, 0.85))
+all_dates_linear_plot <- linear_trend_seasonality(all_dates_train, all_dates_test, month, 
+                          title = "Лінійна регресія з трендом та сезонністю (Звітні дати всі)", 
+                          legend_pos = c(0.2, 0.85))
+cor_dates_linear_plot <- linear_trend_seasonality(cor_dates_train, cor_dates_test, month, 
+                          title = "Лінійна регресія з трендом та сезонністю (Звітні дати КОР)", 
+                          legend_pos = c(0.2, 0.85))
 
 # Поліноміальна модель з трендом та сезонністю----------------------------------------------------
-poly_trend_seasonality(all_daily_train, all_daily_test, week, 
-                       title = "Поліноміальна регресія з трендом та сезонністю (по денно всі)", 
-                       legend_pos = c(0.2, 0.85))
-poly_trend_seasonality(cor_daily_train, cor_daily_test, week, 
+all_daily_poly_plot <- poly_trend_seasonality(all_daily_train, all_daily_test, week, 
+                         title = "Поліноміальна регресія з трендом та сезонністю (по денно всі)", 
+                         legend_pos = c(0.2, 0.85))
+cor_daily_poly_plot <- poly_trend_seasonality(cor_daily_train, cor_daily_test, week, 
                          title = "Поліноміальна регресія з трендом та сезонністю (по денно КОР)", 
                          legend_pos = c(0.2, 0.85))
-poly_trend_seasonality(all_dates_train, all_dates_test, month, 
+all_dates_poly_plot <- poly_trend_seasonality(all_dates_train, all_dates_test, month, 
                          title = "Поліноміальна регресія з трендом та сезонністю (Звітні дати всі)", 
                          legend_pos = c(0.2, 0.85))
-poly_trend_seasonality(cor_dates_train, cor_dates_test, month, 
+cor_dates_poly_plot <- poly_trend_seasonality(cor_dates_train, cor_dates_test, month, 
                          title = "Поліноміальна регресія з трендом та сезонністю (Звітні дати КОР)", 
                          legend_pos = c(0.2, 0.85))
 
 # General Additive Model (GAM)--------------------------------------------------------------------
-gen_add_model(all_daily_train, all_daily_test, week,
-              title = "GAM модель (по денно всі)",
-              legend_pos = c(0.2, 0.85))
-gen_add_model(cor_daily_train, cor_daily_test, week, 
-                       title = "GAM модель (по денно КОР)", 
-                       legend_pos = c(0.2, 0.85))
-gen_add_model(all_dates_train, all_dates_test, month, 
-                       title = "GAM модель (Звітні дати всі)", 
-                       legend_pos = c(0.2, 0.85))
-gen_add_model(cor_dates_train, cor_dates_test, month, 
-                       title = "GAM модель (Звітні дати КОР)", 
-                       legend_pos = c(0.2, 0.85))
+all_daily_gam_plot <- gen_add_model(all_daily_train, all_daily_test, week,
+                        title = "GAM модель (по денно всі)",
+                        legend_pos = c(0.2, 0.85))
+cor_daily_gam_plot <- gen_add_model(cor_daily_train, cor_daily_test, week, 
+                        title = "GAM модель (по денно КОР)", 
+                        legend_pos = c(0.2, 0.85))
+all_dates_gam_plot <- gen_add_model(all_dates_train, all_dates_test, month, 
+                        title = "GAM модель (Звітні дати всі)", 
+                        legend_pos = c(0.2, 0.85))
+cor_dates_gam_plot <- gen_add_model(cor_dates_train, cor_dates_test, month, 
+                        title = "GAM модель (Звітні дати КОР)", 
+                        legend_pos = c(0.2, 0.85))
+
+all_daily_plots <- all_daily_vasicek_plot + all_daily_linear_plot + all_daily_poly_plot + all_daily_gam_plot
+cor_daily_plots <- cor_daily_vasicek_plot + cor_daily_linear_plot + cor_daily_poly_plot + cor_daily_gam_plot
+all_dates_plots <- all_dates_vasicek_plot + all_dates_linear_plot + all_dates_poly_plot + all_dates_gam_plot
+cor_dates_plots <- cor_dates_vasicek_plot + cor_dates_linear_plot + cor_dates_poly_plot + cor_dates_gam_plot
+
+print(all_daily_plots)
+print(cor_daily_plots)
+print(all_dates_plots)
+print(cor_dates_plots)

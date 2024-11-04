@@ -17,7 +17,7 @@ gen_add_model <- function(data, test_data, seasonality, title, legend_pos) {
   test_data$lwr <- lwr
   test_data$upr <- upr
   
-  ggplot() +
+  result_plot <- ggplot() +
     geom_line(data = data, aes(x = date, y = total, color = "Вихідні дані")) +
     geom_line(data = test_data, aes(x = date, y = total, color = "Тестові дані")) +
     geom_line(data = test_data, aes(x = date, y = fit, color = "Середнє значення")) +
@@ -31,4 +31,5 @@ gen_add_model <- function(data, test_data, seasonality, title, legend_pos) {
     theme(legend.position = legend_pos,
           legend.background = element_rect(fill = "white", color = "black"),
           legend.title = element_blank())
+  return(result_plot)
 }

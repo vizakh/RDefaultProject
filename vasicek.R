@@ -183,7 +183,7 @@ VasicekModel <- function(data, test_data, title, legend_pos) {
   forecast <- VasicekSimulation(N, r0, kappa, theta, sigma, dt=1/N)
   test_data$fit <- forecast
 
-  ggplot() +
+  result_plot <- ggplot() +
     geom_line(data = data, aes(x = date, y = total, color = "Вихідні дані")) +
     geom_line(data = test_data, aes(x = date, y = total, color = "Тестові дані")) +
     geom_line(data = test_data, aes(x = date, y = fit, color = "Прогноз за Васічеком")) +
@@ -195,6 +195,7 @@ VasicekModel <- function(data, test_data, title, legend_pos) {
     theme(legend.position = legend_pos,
           legend.background = element_rect(fill = "white", color = "black"),
           legend.title = element_blank())  
+  return(result_plot)
 }
 
 # # test with several (M = 20) simulations

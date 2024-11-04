@@ -18,7 +18,7 @@ poly_trend_seasonality <- function(data, test_data, seasonality,
   test_data$lwr <- forecast_poly[, "lwr"]
   test_data$upr <- forecast_poly[, "upr"]
   
-  ggplot() +
+  result_plot <- ggplot() +
     geom_line(data = data, aes(x = date, y = total, color = "Вихідні дані")) +
     geom_line(data = test_data, aes(x = date, y = total, color = "Тестові дані")) +
     geom_line(data = test_data, aes(x = date, y = fit, color = "Середнє значення")) +
@@ -32,4 +32,5 @@ poly_trend_seasonality <- function(data, test_data, seasonality,
     theme(legend.position = legend_pos,
           legend.background = element_rect(fill = "white", color = "black"),
           legend.title = element_blank())
+  return(result_plot)
 }
