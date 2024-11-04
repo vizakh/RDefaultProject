@@ -143,8 +143,8 @@ VasicekCalibration <- function(data, dt = 1/252) {
   # Requires:
   #   quantmod
 
-  calib_data <- xts(data, order.by = data$Date)
-  calib_data$Date <- NULL
+  calib_data <- xts(data, order.by = data$date)
+  calib_data$date <- NULL
   calib_data <- drop(coredata(calib_data))
   calib_data <- as.numeric(calib_data)
   n <- length(calib_data)
@@ -184,12 +184,12 @@ VasicekModel <- function(data, test_data, title, legend_pos) {
   test_data$fit <- forecast
 
   ggplot() +
-    geom_line(data = data, aes(x = Date, y = number_sold, color = "Вихідні дані")) +
-    geom_line(data = test_data, aes(x = Date, y = number_sold, color = "Тестові дані")) +
-    geom_line(data = test_data, aes(x = Date, y = fit, color = "Прогноз за Васічеком")) +
+    geom_line(data = data, aes(x = date, y = total, color = "Вихідні дані")) +
+    geom_line(data = test_data, aes(x = date, y = total, color = "Тестові дані")) +
+    geom_line(data = test_data, aes(x = date, y = fit, color = "Прогноз за Васічеком")) +
     labs(title = title,
          x = "Дата",
-         y = "Продажі") +
+         y = "Підсумок") +
     scale_color_manual(values = c("Вихідні дані" = "black", "Тестові дані" = "grey",
                                   "Прогноз за Васічеком" = "blue")) +
     theme(legend.position = legend_pos,
