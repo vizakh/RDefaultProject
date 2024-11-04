@@ -31,5 +31,5 @@ gen_add_model <- function(data, test_data, seasonality, title, legend_pos) {
     theme(legend.position = legend_pos,
           legend.background = element_rect(fill = "white", color = "black"),
           legend.title = element_blank())
-  return(result_plot)
+  return(list(test_data$fit, result_plot))
 }
