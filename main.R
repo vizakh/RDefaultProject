@@ -26,16 +26,21 @@ cor_daily_data <- process_daily_data(cor_daily_data)
 all_dates_data <- process_daily_data(all_dates_data)
 cor_dates_data <- process_daily_data(cor_dates_data)
 
-visualize_data(daily_data, "Вихідні дані (щоденні)", 
-               c("Вихідні дані", "Дата", "Продажі"),
-               c(0.84, 0.07))
-
-# visualize_data(monthly_data, "Вихідні дані (щомісячні)", 
-#                c("Вихідні дані (щомісячні)", "Дата", "Продажі"),
-#                c(0.17, 0.07))
+visualize_data(all_daily_data, "По денно всі", 
+               c("По денно всі", "Дата", "Підсумок"),
+               c(0.87, 0.07))
+visualize_data(cor_daily_data, "По денно КОР", 
+               c("По денно КОР", "Дата", "Підсумок"),
+               c(0.87, 0.07))
+visualize_data(all_dates_data, "Звітні дати всі", 
+               c("Звітні дати всі", "Дата", "Підсумок"),
+               c(0.87, 0.07))
+visualize_data(cor_dates_data, "Звітні дати КОР", 
+               c("Звітні дати КОР", "Дата", "Підсумок"),
+               c(0.87, 0.07))
 
 # Модель Васічека---------------------------------------------------------------------------------
-VasicekModel(daily_data, daily_test_data, 
+VasicekModel(all_daily_data, daily_test_data, 
              title = "Модель Васічека (щоденно)", legend_pos = c(0.16, 0.88))
 VasicekModel(monthly_data, monthly_test_data, 
              title = "Модель Васічека (щомісячно)", legend_pos = c(0.16, 0.88))
