@@ -5,6 +5,7 @@ process_daily_data <- function(data) {
       date = "Дата, за яку сформані залишки",
       total = "Загальний підсумок"
     )
+    # mutate(total = (total - min(total)) / (max(total) - min(total)))
   return(data)
 }
 
