@@ -32,5 +32,5 @@ poly_trend_seasonality <- function(data, test_data, seasonality,
     theme(legend.position = legend_pos,
           legend.background = element_rect(fill = "white", color = "black"),
           legend.title = element_blank())
-  return(list(test_data$fit, result_plot))
+  return(list(test_data$fit, result_plot, test_data$date))
 }

@@ -7,6 +7,7 @@ library(forecast)
 library(RODBC)
 library(gsubfn)
 library(patchwork)
+library(openxlsx)
 
 source("process_data.R")
 source("visualize_data.R")
@@ -69,15 +70,19 @@ cor_dates_vasicek <- VasicekModel(cor_dates_train, cor_dates_test,
 
 all_daily_vasicek_plot <- all_daily_vasicek[[2]]
 all_daily_vasicek_values <- all_daily_vasicek[[1]]
+all_daily_vasicek_dates <- all_daily_vasicek[[3]]
 
 cor_daily_vasicek_plot <- cor_daily_vasicek[[2]]
 cor_daily_vasicek_values <- cor_daily_vasicek[[1]]
+cor_daily_vasicek_dates <- cor_daily_vasicek[[3]]
 
 all_dates_vasicek_plot <- all_dates_vasicek[[2]]
 all_dates_vasicek_values <- all_dates_vasicek[[1]]
+all_dates_vasicek_dates <- all_dates_vasicek[[3]]
 
 cor_dates_vasicek_plot <- cor_dates_vasicek[[2]]
 cor_dates_vasicek_values <- cor_dates_vasicek[[1]]
+cor_dates_vasicek_dates <- cor_dates_vasicek[[3]]
 
 # Лінійна модель з трендом та сезонністю----------------------------------------------------------
 all_daily_linear <- linear_trend_seasonality(all_daily_train, all_daily_test, week, 
@@ -95,15 +100,19 @@ cor_dates_linear <- linear_trend_seasonality(cor_dates_train, cor_dates_test, mo
 
 all_daily_linear_plot <- all_daily_linear[[2]]
 all_daily_linear_values <- all_daily_linear[[1]]
+all_daily_linear_dates <- all_daily_linear[[3]]
 
 cor_daily_linear_plot <- cor_daily_linear[[2]]
 cor_daily_linear_values <- cor_daily_linear[[1]]
+cor_daily_linear_dates <- cor_daily_linear[[3]]
 
 all_dates_linear_plot <- all_dates_linear[[2]]
 all_dates_linear_values <- all_dates_linear[[1]]
+all_dates_linear_dates <- all_dates_linear[[3]]
 
 cor_dates_linear_plot <- cor_dates_linear[[2]]
 cor_dates_linear_values <- cor_dates_linear[[1]]
+cor_dates_linear_dates <- cor_dates_linear[[3]]
 
 # Поліноміальна модель з трендом та сезонністю----------------------------------------------------
 all_daily_poly <- poly_trend_seasonality(all_daily_train, all_daily_test, week, 
@@ -121,15 +130,19 @@ cor_dates_poly <- poly_trend_seasonality(cor_dates_train, cor_dates_test, month,
 
 all_daily_poly_plot <- all_daily_poly[[2]]
 all_daily_poly_values <- all_daily_poly[[1]]
+all_daily_poly_dates <- all_daily_poly[[3]]
 
 cor_daily_poly_plot <- cor_daily_poly[[2]]
 cor_daily_poly_values <- cor_daily_poly[[1]]
+cor_daily_poly_dates <- cor_daily_poly[[3]]
 
 all_dates_poly_plot <- all_dates_poly[[2]]
 all_dates_poly_values <- all_dates_poly[[1]]
+all_dates_poly_dates <- all_dates_poly[[3]]
 
 cor_dates_poly_plot <- cor_dates_poly[[2]]
 cor_dates_poly_values <- cor_dates_poly[[1]]
+cor_dates_poly_dates <- cor_dates_poly[[3]]
 
 # General Additive Model (GAM)--------------------------------------------------------------------
 all_daily_gam <- gen_add_model(all_daily_train, all_daily_test, week,
@@ -147,24 +160,75 @@ cor_dates_gam <- gen_add_model(cor_dates_train, cor_dates_test, month,
 
 all_daily_gam_plot <- all_daily_gam[[2]]
 all_daily_gam_values <- all_daily_gam[[1]]
+all_daily_gam_dates <- all_daily_gam[[3]]
 
 cor_daily_gam_plot <- cor_daily_gam[[2]]
 cor_daily_gam_values <- cor_daily_gam[[1]]
+cor_daily_gam_dates <- cor_daily_gam[[3]]
 
 all_dates_gam_plot <- all_dates_gam[[2]]
 all_dates_gam_values <- all_dates_gam[[1]]
+all_dates_gam_dates <- all_dates_gam[[3]]
 
 cor_dates_gam_plot <- cor_dates_gam[[2]]
 cor_dates_gam_values <- cor_dates_gam[[1]]
+cor_dates_gam_dates <- cor_dates_gam[[3]]
 
-all_daily_values <- list(all_daily_vasicek_values, all_daily_linear_values, 
-                         all_daily_poly_values, all_daily_gam_values)
-cor_daily_values <- list(cor_daily_vasicek_values, cor_daily_linear_values, 
-                         cor_daily_poly_values, cor_daily_gam_values)
-all_dates_values <- list(all_dates_vasicek_values, all_dates_linear_values, 
-                         all_dates_poly_values, all_dates_gam_values)
-cor_dates_values <- list(cor_dates_vasicek_values, cor_dates_linear_values, 
-                         cor_dates_poly_values, cor_dates_gam_values)
+all_daily_values <- list(all_daily_vasicek_dates, all_daily_vasicek_values, 
+                         all_daily_linear_values, 
+                         all_daily_poly_values, all_daily_gam_values,
+                         all_daily_test$total)
+cor_daily_values <- list(cor_daily_vasicek_dates, cor_daily_vasicek_values,
+                         cor_daily_linear_values, 
+                         cor_daily_poly_values, cor_daily_gam_values,
+                         cor_daily_test$total)
+all_dates_values <- list(all_dates_vasicek_dates, all_dates_vasicek_values,
+                         all_dates_linear_values, 
+                         all_dates_poly_values, all_dates_gam_values,
+                         all_dates_test$total)
+cor_dates_values <- list(cor_dates_vasicek_dates, cor_dates_vasicek_values,
+                         cor_dates_linear_values, 
+                         cor_dates_poly_values, cor_dates_gam_values,
+                         cor_dates_test$total)
+
+numeric_all_daily_results <- data.frame("Дата" = all_daily_values[[1]],
+                                        "Васічек" = all_daily_values[[2]], 
+                                        "Лінійна" = all_daily_values[[3]],
+                                        "Поліноміальна" = all_daily_values[[4]], 
+                                        "GAM" = all_daily_values[[5]],
+                                        "Тестові дані" = all_daily_values[[6]])
+numeric_cor_daily_results <- data.frame("Дата" = cor_daily_values[[1]],
+                                        "Васічек" = cor_daily_values[[2]], 
+                                        "Лінійна" = cor_daily_values[[3]],
+                                        "Поліноміальна" = cor_daily_values[[4]], 
+                                        "GAM" = cor_daily_values[[5]],
+                                        "Тестові дані" = cor_daily_values[[6]])
+numeric_all_dates_results <- data.frame("Дата" = all_dates_values[[1]],
+                                        "Васічек" = all_dates_values[[2]], 
+                                        "Лінійна" = all_dates_values[[3]],
+                                        "Поліноміальна" = all_dates_values[[4]], 
+                                        "GAM" = all_dates_values[[5]],
+                                        "Тестові дані" = all_dates_values[[6]])
+numeric_cor_dates_results <- data.frame("Дата" = cor_dates_values[[1]],
+                                        "Васічек" = cor_dates_values[[2]], 
+                                        "Лінійна" = cor_dates_values[[3]],
+                                        "Поліноміальна" = cor_dates_values[[4]], 
+                                        "GAM" = cor_dates_values[[5]],
+                                        "Тестові дані" = cor_dates_values[[6]])
+
+OUT <- createWorkbook()
+
+addWorksheet(OUT, "По денно всі")
+addWorksheet(OUT, "По денно КОР")
+addWorksheet(OUT, "Звітні дати всі")
+addWorksheet(OUT, "Звітні дати КОР")
+
+writeData(OUT, sheet = "По денно всі", x = numeric_all_daily_results)
+writeData(OUT, sheet = "По денно КОР", x = numeric_cor_daily_results)
+writeData(OUT, sheet = "Звітні дати всі", x = numeric_all_dates_results)
+writeData(OUT, sheet = "Звітні дати КОР", x = numeric_cor_dates_results)
+
+saveWorkbook(OUT, "F:/Pivdennyy/result_models.xlsx")
 
 all_daily_plots <- all_daily_vasicek_plot + all_daily_linear_plot + all_daily_poly_plot + all_daily_gam_plot
 cor_daily_plots <- cor_daily_vasicek_plot + cor_daily_linear_plot + cor_daily_poly_plot + cor_daily_gam_plot

@@ -195,7 +195,7 @@ VasicekModel <- function(data, test_data, title, legend_pos) {
     theme(legend.position = legend_pos,
           legend.background = element_rect(fill = "white", color = "black"),
           legend.title = element_blank())  
-  return(list(test_data$fit, result_plot))
+  return(list(test_data$fit, result_plot, test_data$date))
 }
 
 # # test with several (M = 20) simulations
