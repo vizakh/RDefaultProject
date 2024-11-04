@@ -20,7 +20,6 @@ poly_trend_seasonality <- function(data, test_data, seasonality,
   
   result_plot <- ggplot() +
     geom_line(data = data, aes(x = date, y = total, color = "Вихідні дані")) +
-    geom_line(data = test_data, aes(x = date, y = total, color = "Тестові дані")) +
     geom_line(data = test_data, aes(x = date, y = fit, color = "Середнє значення")) +
     geom_line(data = test_data, aes(x = date, y = upr, color = "Довірчий інтервал (95%)")) +
     geom_line(data = test_data, aes(x = date, y = lwr, color = "Довірчий інтервал (95%)")) +

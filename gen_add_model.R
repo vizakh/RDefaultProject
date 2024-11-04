@@ -2,7 +2,7 @@ gen_add_model <- function(data, test_data, seasonality, title, legend_pos) {
   data$time_index <- 1:nrow(data)
   data$seasonality <- seasonality(data$date)
   
-  gam_model <- gam(total ~ s(time_index) + factor(seasonality), data = data)
+  gam_model <- gam(total ~ s(time_index), data = data)
   print(summary(gam_model))
   
   test_data$time_index <- (nrow(data) + 1):(nrow(data) + nrow(test_data))
@@ -19,7 +19,6 @@ gen_add_model <- function(data, test_data, seasonality, title, legend_pos) {
   
   result_plot <- ggplot() +
     geom_line(data = data, aes(x = date, y = total, color = "Вихідні дані")) +
-    geom_line(data = test_data, aes(x = date, y = total, color = "Тестові дані")) +
     geom_line(data = test_data, aes(x = date, y = fit, color = "Середнє значення")) +
     geom_line(data = test_data, aes(x = date, y = upr, color = "Довірчий інтервал (95%)")) +
     geom_line(data = test_data, aes(x = date, y = lwr, color = "Довірчий інтервал (95%)")) +

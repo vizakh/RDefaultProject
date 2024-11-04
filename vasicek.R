@@ -185,7 +185,6 @@ VasicekModel <- function(data, test_data, title, legend_pos) {
 
   result_plot <- ggplot() +
     geom_line(data = data, aes(x = date, y = total, color = "Вихідні дані")) +
-    geom_line(data = test_data, aes(x = date, y = total, color = "Тестові дані")) +
     geom_line(data = test_data, aes(x = date, y = fit, color = "Прогноз за Васічеком")) +
     labs(title = title,
          x = "Дата",
