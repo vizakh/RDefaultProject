@@ -170,7 +170,7 @@ VasicekCalibration <- function(data, dt = 1/252) {
   return(c(kappa, theta, sigma, r0))
 }
 
-VasicekModel <- function(data, test_data, title, legend_pos) {
+VasicekModel <- function(data, test_data, future_data, title, legend_pos) {
   N <- nrow(test_data)
   t <- (1:N)
   
@@ -185,7 +185,8 @@ VasicekModel <- function(data, test_data, title, legend_pos) {
 
   result_plot <- ggplot() +
     geom_line(data = data, aes(x = date, y = total, color = "Вихідні дані")) +
-    geom_line(data = test_data, aes(x = date, y = total, color = "Тестові дані")) +
+    geom_line(data = test_data[test_data$date < min(future_data$date),], 
+              aes(x = date, y = total, color = "Тестові дані")) +
     geom_line(data = test_data, aes(x = date, y = fit, color = "Прогноз за Васічеком")) +
     labs(title = title,
          x = "Дата",

@@ -1,4 +1,4 @@
-gen_add_model <- function(data, test_data, seasonality, title, legend_pos) {
+gen_add_model <- function(data, test_data, future_data, seasonality, title, legend_pos) {
   data$time_index <- 1:nrow(data)
   data$seasonality <- seasonality(data$date)
   
@@ -19,7 +19,8 @@ gen_add_model <- function(data, test_data, seasonality, title, legend_pos) {
   
   result_plot <- ggplot() +
     geom_line(data = data, aes(x = date, y = total, color = "Вихідні дані")) +
-    geom_line(data = test_data, aes(x = date, y = total, color = "Тестові дані")) +
+    geom_line(data = test_data[test_data$date < min(future_data$date),], 
+              aes(x = date, y = total, color = "Тестові дані")) +
     geom_line(data = test_data, aes(x = date, y = fit, color = "Середнє значення")) +
     geom_line(data = test_data, aes(x = date, y = upr, color = "Довірчий інтервал (95%)")) +
     geom_line(data = test_data, aes(x = date, y = lwr, color = "Довірчий інтервал (95%)")) +
