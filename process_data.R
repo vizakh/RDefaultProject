@@ -14,3 +14,10 @@ create_train_test <- function(data, fraction) {
   test <- data[(border + 1):nrow(data),]
   return(list(train, test))
 }
+
+normalize_data <- function(data) {
+  process <- preProcess(as.data.frame(data$total), method=c("range"))
+  norm_scale <- predict(process, as.data.frame(data$total))
+  data$total <- norm_scale$`data$total`
+  return(data)
+}

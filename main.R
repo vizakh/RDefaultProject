@@ -8,6 +8,7 @@ library(RODBC)
 library(gsubfn)
 library(patchwork)
 library(openxlsx)
+library(caret)
 
 source("process_data.R")
 source("visualize_data.R")
@@ -37,6 +38,11 @@ all_dates_data <- process_data(all_dates_data,
                                col_values_selected[[1]], col_values_selected[[2]])
 cor_dates_data <- process_data(cor_dates_data, 
                                col_values_selected[[1]], col_values_selected[[2]])
+
+# all_daily_data <- normalize_data(all_daily_data)
+# cor_daily_data <- normalize_data(cor_daily_data)
+# all_dates_data <- normalize_data(all_dates_data)
+# cor_dates_data <- normalize_data(cor_dates_data)
 
 visualize_data(all_daily_data, "По денно всі", 
                c("По денно всі", "Дата",  col_values_selected[[2]]),
