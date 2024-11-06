@@ -1,15 +1,15 @@
-process_daily_data <- function(data) {
-  data <- data[, c(1, 4)]
+process_data <- function(data, col_values_index, col_values_name) {
+  data <- data[, c(1, col_values_index)]
   data <- data %>% 
     rename(
       date = "Дата, за яку сформані залишки",
-      total = "Загальний підсумок"
+      total = col_values_name
     )
   return(data)
 }
 
-create_train_test <- function(data, fraction = 0.9) {
-  border <- round(nrow(data) * 0.9)
+create_train_test <- function(data, fraction) {
+  border <- round(nrow(data) * fraction)
   train <- data[1:border,]
   test <- data[(border + 1):nrow(data),]
   return(list(train, test))

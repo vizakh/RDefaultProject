@@ -24,37 +24,47 @@ cor_daily_data <- sqlFetch(con2, "По денно КОР")
 all_dates_data <- sqlFetch(con2, "Звітні дати всі")
 cor_dates_data <- sqlFetch(con2, "Звітні дати КОР")
 
-all_daily_data <- process_daily_data(all_daily_data)
-cor_daily_data <- process_daily_data(cor_daily_data)
-all_dates_data <- process_daily_data(all_dates_data)
-cor_dates_data <- process_daily_data(cor_dates_data)
+col_values_total <- list(4, "Загальний підсумок")
+col_values_FCY <- list(2, "FCY")
+col_values_UAH <- list(3, "UAH")
+col_values_selected <- col_values_total
+
+all_daily_data <- process_data(all_daily_data, 
+                               col_values_selected[[1]], col_values_selected[[2]])
+cor_daily_data <- process_data(cor_daily_data, 
+                               col_values_selected[[1]], col_values_selected[[2]])
+all_dates_data <- process_data(all_dates_data, 
+                               col_values_selected[[1]], col_values_selected[[2]])
+cor_dates_data <- process_data(cor_dates_data, 
+                               col_values_selected[[1]], col_values_selected[[2]])
 
 visualize_data(all_daily_data, "По денно всі", 
-               c("По денно всі", "Дата", "Підсумок"),
+               c("По денно всі", "Дата",  col_values_selected[[2]]),
                c(0.87, 0.07))
 visualize_data(cor_daily_data, "По денно КОР", 
-               c("По денно КОР", "Дата", "Підсумок"),
+               c("По денно КОР", "Дата",  col_values_selected[[2]]),
                c(0.87, 0.07))
 visualize_data(all_dates_data, "Звітні дати всі", 
-               c("Звітні дати всі", "Дата", "Підсумок"),
+               c("Звітні дати всі", "Дата",  col_values_selected[[2]]),
                c(0.87, 0.07))
 visualize_data(cor_dates_data, "Звітні дати КОР", 
-               c("Звітні дати КОР", "Дата", "Підсумок"),
+               c("Звітні дати КОР", "Дата",  col_values_selected[[2]]),
                c(0.87, 0.07))
 
-train_test_set <- create_train_test(all_daily_data)
+fraction <- 0.9
+train_test_set <- create_train_test(all_daily_data, fraction)
 all_daily_train <- train_test_set[[1]]
 all_daily_test <- train_test_set[[2]]
 
-train_test_set <- create_train_test(cor_daily_data)
+train_test_set <- create_train_test(cor_daily_data, fraction)
 cor_daily_train <- train_test_set[[1]]
 cor_daily_test <- train_test_set[[2]]
 
-train_test_set <- create_train_test(all_dates_data)
+train_test_set <- create_train_test(all_dates_data, fraction)
 all_dates_train <- train_test_set[[1]]
 all_dates_test <- train_test_set[[2]]
 
-train_test_set <- create_train_test(cor_dates_data)
+train_test_set <- create_train_test(cor_dates_data, fraction)
 cor_dates_train <- train_test_set[[1]]
 cor_dates_test <- train_test_set[[2]]
 
@@ -94,12 +104,12 @@ addWorksheet(OUT, "По денно КОР")
 addWorksheet(OUT, "Звітні дати всі")
 addWorksheet(OUT, "Звітні дати КОР")
 
-writeData(OUT, sheet = "По денно всі", x = numeric_all_daily_results)
-writeData(OUT, sheet = "По денно КОР", x = numeric_cor_daily_results)
-writeData(OUT, sheet = "Звітні дати всі", x = numeric_all_dates_results)
-writeData(OUT, sheet = "Звітні дати КОР", x = numeric_cor_dates_results)
+writeData(OUT, sheet = "По денно всі", x = all_daily[[1]])
+writeData(OUT, sheet = "По денно КОР", x = cor_daily[[1]])
+writeData(OUT, sheet = "Звітні дати всі", x = all_dates[[1]])
+writeData(OUT, sheet = "Звітні дати КОР", x = cor_dates[[1]])
 
-saveWorkbook(OUT, "F:/Pivdennyy/result_models.xlsx")
+# saveWorkbook(OUT, "F:/Pivdennyy/result_models_future_FCY.xlsx")
 
 print(all_daily[[2]])
 print(cor_daily[[2]])
