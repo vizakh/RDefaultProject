@@ -120,28 +120,7 @@ VasicekYieldCurve <- function(r0, kappa, theta, sigma, max.maturity=10) {
 
 
 VasicekCalibration <- function(data, dt = 1/252) {
-  # Calibrates the vasicek model using the maximum likelihood estimator. Details
-  # about the maximum likelihood extomator are at the link below. 
-  #
-  # http://www.sitmo.com/article/calibrating-the-ornstein-uhlenbeck-model/
-  #
-  # TODO - Add in start and end dates. 
-  #
-  # Args:
-  #   fred.ticker: Ticker used to download the historical rates from the Federal
-  #                Reserve Bank of St Louis. Defaults to DSG3MO, the 3-Month 
-  #                Treasury Constant Maturity Rate. 
-  #   dt: The change in time between observations. Defaults to 1/252 because
-  #       we assume generation of daily rates and there are 252 trading days 
-  #       per year. 
-  #
-  # Returns:
-  #   A vector of the form c(kappa, theta, sigma, r0), where kappa is the mean
-  #   reversion rate, theta is the long-term rate/mean, sigma is the volatility
-  #   and r0 is the last observed rate.
-  #
-  # Requires:
-  #   quantmod
+  # Calibrates the vasicek model using the maximum likelihood estimator.
 
   calib_data <- xts(data, order.by = data$date)
   calib_data$date <- NULL
@@ -198,28 +177,3 @@ VasicekModel <- function(data, test_data, future_data, title, legend_pos) {
           legend.title = element_blank())  
   return(list(test_data$fit, result_plot, test_data$date))
 }
-
-# # test with several (M = 20) simulations
-# M <- 20
-# test.mat <- VasicekSimulations(M, N, r0, kappa, theta, sigma)
-# 
-# # plot the paths
-# plot(t, test.mat[, 1], type = 'l', main = 'Short Rates', ylab = 'rt', 
-#      ylim = c(0, max(test.mat)), col = 1)
-# for (count in 2:ncol(test.mat)) {
-#   lines(t, test.mat[, count], col = count)
-# }
-# # plot the expected rate and +- 2 standard deviations (theoretical)
-# expected <- theta + (r0 - theta)*exp(-kappa*t)
-# stdev <- sqrt( sigma^2 / (2*kappa)*(1 - exp(-2*kappa*t)))
-# lines(t, expected, lty=2) 
-# lines(t, expected + 2*stdev, lty=2) 
-# lines(t, expected - 2*stdev, lty=2)
-# 
-# # price the zero coupon bonds 
-# VasicekZeroCouponBondPrice(r0, kappa, theta, sigma, years) 
-# 
-# # derive a yield curve 
-# # (can do this for several values of r0 to get several curves)
-# yields <- VasicekYieldCurve(r0, kappa, theta, sigma, 10)
-# plot(1:10, yields, xlab = 'Maturity', type = 'l', ylab = 'Yield', main = 'Yield Curve')

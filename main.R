@@ -116,7 +116,7 @@ writeData(OUT, sheet = "По денно КОР", x = cor_daily[[1]])
 writeData(OUT, sheet = "Звітні дати всі", x = all_dates[[1]])
 writeData(OUT, sheet = "Звітні дати КОР", x = cor_dates[[1]])
 
-# saveWorkbook(OUT, "F:/Pivdennyy/result_models_future_FCY.xlsx")
+# saveWorkbook(OUT, "F:/Pivdennyy/result_models_future_ridge_lasso.xlsx")
 
 print(all_daily[[2]])
 print(cor_daily[[2]])
