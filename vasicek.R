@@ -1,13 +1,5 @@
-####
-# R script for simulationg bond short rates with the Vasicek model. It includes
-# functions to calibrate the Vasicek model, run simulations and derive yield
-# curves. 
-#
-# Three major sources used for this are below. 
-#
-# http://delta9hedge.blogspot.com/2013/05/simulation-of-vasicek-interest-rates-in.html
-# http://www.sitmo.com/article/calibrating-the-ornstein-uhlenbeck-model/
-# http://quantcorner.wordpress.com/2013/11/17/least-squares-and-maximum-likelihood-estimation-calibration-with-r/
+# Даний файл написаний на основі наступного проекту на гітхабі:
+# https://github.com/bickez/puppy-economics/blob/master/vasicek.R
 
 VasicekHelper <- function(r, kappa, theta, sigma, dt = 1/252) {
   # Helper function that calculates the next rate based on the discretization
@@ -119,16 +111,17 @@ VasicekYieldCurve <- function(r0, kappa, theta, sigma, max.maturity=10) {
 }
 
 
-VasicekCalibration <- function(data, dt = 1/252) {
-  # Calibrates the vasicek model using the maximum likelihood estimator.
-
+# Функція для калібрування параметрів на основі набору даних з використанням
+# методу маскимального правдоподібності.
+VasicekCalibration <- function(data, dt) {
+  # Обробка набору даних для обчислення параметрів.
   calib_data <- xts(data, order.by = data$date)
   calib_data$date <- NULL
   calib_data <- drop(coredata(calib_data))
   calib_data <- as.numeric(calib_data)
   n <- length(calib_data)
   
-  # do the calculations
+  # Обчислення параметрів.
   Sx <- sum(calib_data[1:(length(calib_data) - 1)])
   Sy <- sum(calib_data[2:length(calib_data)])
   Sxx <- as.numeric(crossprod(calib_data[1:(length(calib_data) - 1)],
@@ -149,19 +142,26 @@ VasicekCalibration <- function(data, dt = 1/252) {
   return(c(kappa, theta, sigma, r0))
 }
 
+# Основна функція для прогнозування за моделлю Васічека.
 VasicekModel <- function(data, test_data, future_data, title, legend_pos) {
   N <- nrow(test_data)
   t <- (1:N)
   
+  # Калібруємо параметри для моделі Васічека на основі train набору.
   params <- VasicekCalibration(data, dt=1/N)
   kappa <- params[1]
   theta <- params[2]
   sigma <- params[3]
   r0 <- params[4]
   
+  # Запускаємо симуляцію моделі для отримання прогнозу.
   forecast <- VasicekSimulation(N, r0, kappa, theta, sigma, dt=1/N)
+  
+  # Записуємо прогноз у набір тестових даних.
   test_data$fit <- forecast
 
+  # Формуємо результуючий графік з даними із train-test (існуючі дані), а також
+  # графік прогнозу
   result_plot <- ggplot() +
     geom_line(data = data, aes(x = date, y = total, color = "Вихідні дані")) +
     geom_line(data = test_data[test_data$date < min(future_data$date),], 
@@ -175,5 +175,8 @@ VasicekModel <- function(data, test_data, future_data, title, legend_pos) {
     theme(legend.position = legend_pos,
           legend.background = element_rect(fill = "white", color = "black"),
           legend.title = element_blank())  
+  
+  # Повертаємо список зі значень прогнозу у вигляді таблиці, результуючого 
+  # графіку так набору дат, на які робиться прогноз.
   return(list(test_data$fit, result_plot, test_data$date))
 }

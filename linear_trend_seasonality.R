@@ -1,21 +1,37 @@
+# Функція для побудови моделі лінійної регресії з урахуванням сезонності.
 linear_trend_seasonality <- function(data, test_data, future_data, seasonality, 
                                      title, legend_pos) {
+  # Формуємо стовбці з індексом часу від 1 до загальної кількості дат та з 
+  # сезонністю. 
   data$time_index <- 1:nrow(data)
   data$seasonality <- seasonality(data$date)
   
+  # Будуємо модель на основі часового індексу та сезонності у якості фактору.
   linear_seasonal_model <- lm(total ~ time_index + factor(seasonality), 
                               data = data)
+  
+  # Виводимо у консоль інформацію щодо моделі.
   print(summary(linear_seasonal_model))
   
+  # Формуємо часовий індекс та сезонність для тестових даних для коректної 
+  # роботи функції прогнозування.
   test_data$time_index <- (nrow(data) + 1):(nrow(data) + nrow(test_data))
   test_data$seasonality <- seasonality(test_data$date)
   
+  # Генеруємо прогноз на усі тестові дати, а також довірчі інтервали.
   forecast_seasonal <- predict(linear_seasonal_model, newdata = test_data, 
                                interval = "confidence", level = 0.95)
+  
+  # Записуємо результати у набір тестових даних:
+  # fit - згенерований прогноз;
+  # upr - верхня межа довірчого інтервалу;
+  # lwr - нижня межа довірчого інтервалу.
   test_data$fit <- forecast_seasonal[, "fit"]
   test_data$lwr <- forecast_seasonal[, "lwr"]
   test_data$upr <- forecast_seasonal[, "upr"]
   
+  # Формуємо результуючий графік з даними із train-test (існуючі дані), а також
+  # графік прогнозу та довірчих інтервалів.
   result_plot <- ggplot() +
     geom_line(data = data, aes(x = date, y = total, color = "Вихідні дані")) +
     geom_line(data = test_data[test_data$date < min(future_data$date),], 
@@ -31,5 +47,8 @@ linear_trend_seasonality <- function(data, test_data, future_data, seasonality,
     theme(legend.position = legend_pos,
           legend.background = element_rect(fill = "white", color = "black"),
           legend.title = element_blank())
+  
+  # Повертаємо список зі значень прогнозу у вигляді таблиці, результуючого 
+  # графіку та набору дат, на які робиться прогноз.
   return(list(test_data$fit, result_plot, test_data$date))
 }
