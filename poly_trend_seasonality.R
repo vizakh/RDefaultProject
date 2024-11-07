@@ -2,14 +2,12 @@ poly_trend_seasonality <- function(data, test_data, future_data, seasonality,
                                    title, legend_pos) {
   data$time_index <- 1:nrow(data)
   data$seasonality <- seasonality(data$date)
-  data$time_squared <- data$time_index^2
   
-  poly_model <- lm(total ~ time_index + time_squared + factor(seasonality), 
+  poly_model <- lm(total ~ poly(time_index, 3) + factor(seasonality), 
                    data = data)
   print(summary(poly_model))
   
   test_data$time_index <- (nrow(data) + 1):(nrow(data) + nrow(test_data))
-  test_data$time_squared <-  test_data$time_index^2
   test_data$seasonality <- seasonality(test_data$date)
   
   forecast_poly <- predict(poly_model, newdata = test_data, 
